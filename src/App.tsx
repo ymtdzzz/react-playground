@@ -1,9 +1,10 @@
 import React, { ReactElement } from 'react'
 import { BrowserRouter as Router, Route } from 'react-router-dom'
 import Home from './components/common/Home'
-import About from './components/common/About'
 import './App.css'
 import Navbar from './components/common/Navbar'
+import 'normalize.css'
+import DndMatrix from './components/dnd_matrix/DndMatrix'
 
 const App: React.FC = (): ReactElement => {
   return (
@@ -13,7 +14,7 @@ const App: React.FC = (): ReactElement => {
           <Navbar />
           <hr />
           <Route exact path="/" component={Home} />
-          <Route exact path="/About" component={About} />
+          <Route exact path="/DndMatrix" component={DndMatrix} />
         </div>
       </Router>
     </div>

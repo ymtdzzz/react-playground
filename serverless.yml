@@ -1,0 +1,105 @@
+service: react-playground
+plugins:
+  - serverless-s3-sync
+
+custom:
+  s3Sync:
+    - bucketName: reactplayground.zeroclock.dev
+      localDir: build
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  region: ap-northeast-1
+  stage: dev
+    
+resources:
+  Resources:
+    StaticSite:
+      Type: AWS::S3::Bucket
+      Properties:
+        AccessControl: PublicRead
+        BucketName: reactplayground.zeroclock.dev
+        WebsiteConfiguration:
+          IndexDocument: index.html
+    StaticSiteS3BucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket:
+          Ref: StaticSite
+        PolicyDocument:
+          Statement:
+            - Sid: PublicReadGetObject
+              Effect: Allow
+              Principal: "*"
+              Action:
+              - S3:GetObject
+              Resource:
+                Fn::Join: [
+                  "", [
+                    "arn:aws:s3:::",
+                    {
+                      "Ref": "StaticSite"
+                    },
+                    "/*"
+                  ]
+                ]
+    StaticSiteCloudFront:
+      Type: AWS::CloudFront::Distribution
+      Properties:
+        DistributionConfig:
+          Enabled: true
+          PriceClass: PriceClass_200
+          DefaultRootObject: index.html
+          Origins:
+            - Id: S3Origin
+              DomainName:
+                Fn::GetAtt:
+                  - StaticSite
+                  - DomainName
+              S3OriginConfig:
+                OriginAccessIdentity:
+                  Fn::Join:
+                    - "/"
+                    - - origin-access-identity/cloudfront
+                      - Ref: StaticCloudFrontOriginAccessIdentity
+          DefaultCacheBehavior:
+            AllowedMethods:
+              - HEAD
+              - GET
+            CachedMethods:
+              - HEAD
+              - GET
+            Compress: true
+            DefaultTTL: 900
+            MaxTTL: 1200
+            MinTTL: 600
+            ForwardedValues:
+              QueryString: true
+            SmoothStreaming: false
+            TargetOriginId: S3Origin
+            ViewerProtocolPolicy: https-only
+          ViewerCertificate:
+            SslSupportMethod: sni-only
+            AcmCertificateArn: arn:aws:acm:us-east-1:936630031871:certificate/ca4ad8ac-ab99-46e9-818d-5838ddff0da3
+          Aliases:
+            - reactplayground.zeroclock.dev
+    StaticCloudFrontOriginAccessIdentity:
+      Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+      Properties:
+        CloudFrontOriginAccessIdentityConfig:
+          Comment:
+            Ref: AWS::StackName
+    DnsRecord:
+      Type: "AWS::Route53::RecordSet"
+      Properties:
+        AliasTarget:
+          DNSName:
+            Fn::GetAtt:
+              - StaticSiteCloudFront
+              - DomainName
+          HostedZoneId: Z2FDTNDATAQYW2
+        HostedZoneId: Z09159923CKJ7PALL13X
+        Name:
+          Ref: StaticSite
+        Type: 'A'
