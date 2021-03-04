@@ -9,6 +9,12 @@ interface InputData {
   description: string,
 }
 
+interface Item {
+  nodeName: string,
+  description: string,
+  data: GridLayout.Layout,
+}
+
 const TextArea = styled.div`
   height: 150px;
   width: 100%;
@@ -30,18 +36,20 @@ const Node = styled.div`
   border: 1px solid black;
 `
 
-const Node2 = styled.div`
-  border: 1px solid red;
-  background-color: red;
-`
+/* const Node2 = styled.div`
+ *   border: 1px solid red;
+ *   background-color: red;
+ * ` */
 
 const DndMatrix: React.FC = (): ReactElement => {
   const elm = useRef<HTMLDivElement>(null)
   const [matrixAreaWidth, setMatrixAreaWidth] = useState(0)
-  const [nodeData, setNodeData] = useState<GridLayout.Layout[]>([
-    {i: 'a', x: 0, y: 0, w: 1, h: 2, static: true},
-    {i: 'b', x: 1, y: 6, w: 11, h: 1, static: true},
-    {i: 'c', x: 4, y: 0, w: 2, h: 2}
+  const [nodeData, setNodeData] = useState<Item[]>([
+    {
+      nodeName: 'X axis',
+      description: '',
+      data: {i: '1', x: 1, y: 6, w: 11, h: 1, static: true},
+    },
   ])
   const [inputData, setInputData] = useState<InputData>({nodeName: '', description: ''})
 
@@ -52,7 +60,15 @@ const DndMatrix: React.FC = (): ReactElement => {
   }, [matrixAreaWidth, nodeData])
 
   const onLayoutChange = (layout: GridLayout.Layout[]) => {
-    setNodeData(layout)
+    var newNodeData: Item[] = []
+    layout.forEach((item) => {
+      var result = nodeData.find((i) => i.data.i == item.i)
+      if (result) {
+        result.data = item
+        newNodeData.push(result)
+      }
+    })
+    setNodeData(newNodeData)
   }
 
   const onNodeNameChanged = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -64,6 +80,20 @@ const DndMatrix: React.FC = (): ReactElement => {
   }
 
   const onAddNode = () => {
+    const maxIdx = Math.max.apply(null, nodeData.map((item) => parseInt(item.data.i)))
+    var newNodeData = nodeData
+    newNodeData.push({
+      nodeName: inputData.nodeName,
+      description: inputData.description,
+      data: {
+        i: `${maxIdx + 1}`,
+        x: 0,
+        y: 0,
+        w: 1,
+        h: 1,
+      }
+    })
+    setNodeData(newNodeData)
     setInputData({nodeName: '', description: ''})
   }
 
@@ -75,10 +105,8 @@ const DndMatrix: React.FC = (): ReactElement => {
           <Row>
             <Col md={8} debug>
               <MatrixArea ref={elm}>
-                <GridLayout cols={12} rowHeight={30} maxRows={12} layout={nodeData} width={matrixAreaWidth} compactType={null} onLayoutChange={onLayoutChange}>
-                  <Node key="a">a</Node>
-                  <Node2 key="b">X axis</Node2>
-                  <Node key="c">c</Node>
+                <GridLayout cols={12} rowHeight={30} maxRows={12} layout={nodeData.map((item) => item.data)} width={matrixAreaWidth} compactType={null} onLayoutChange={onLayoutChange}>
+                  {nodeData.map((item) => <Node key={item.data.i}>{item.nodeName}</Node>)}
                 </GridLayout>
               </MatrixArea>
             </Col>
