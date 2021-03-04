@@ -25,3 +25,5 @@ yarn-error.log*
 .log/
 
 .serverless/
+
+.markdown-preview.html
