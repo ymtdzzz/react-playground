@@ -6,6 +6,7 @@ cache:
   npm: true
 install:
 - npm install serverless -g
+- sls config credentials --stage dev --provider aws --key "${aws_access_key_id}" --secret "${aws_secret_access_key}"
 - yarn install
 script:
 - yarn build
