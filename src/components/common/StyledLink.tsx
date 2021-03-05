@@ -8,11 +8,11 @@ const LinkWrapper = styled.a`
 `
 
 type Props = {
-  to: string,
-  text: string,
+  to: string
+  text: string
 }
 
-const StyledLink: React.FC<Props> = ({to, text}): ReactElement => {
+const StyledLink: React.FC<Props> = ({ to, text }): ReactElement => {
   return (
     <LinkWrapper>
       <Link to={to}>{text}</Link>
