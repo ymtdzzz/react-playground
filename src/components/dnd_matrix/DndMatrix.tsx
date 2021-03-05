@@ -8,6 +8,7 @@ import ReactTooltip from 'react-tooltip'
 interface InputData {
   nodeName: string
   description: string
+  key?: string
 }
 
 interface Item {
@@ -27,7 +28,7 @@ const ContainerWrapper = styled.div`
 `
 
 const MatrixArea = styled.div`
-  height: 500px;
+  height: 750px;
 `
 
 const SideArea = styled.div``
@@ -53,19 +54,19 @@ const DndMatrix: React.FC = (): ReactElement => {
       nodeName: 'X axis',
       description: '',
       itemType: 'xAxis',
-      data: { i: '1', x: 1, y: 5, w: 22, h: 2, static: true },
+      data: { i: '1', x: 1, y: 8, w: 22, h: 1, static: true },
     },
     {
       nodeName: 'Y axis A',
       description: '',
       itemType: 'yAxis',
-      data: { i: '2', x: 0, y: 0, w: 1, h: 5, static: true },
+      data: { i: '2', x: 0, y: 0, w: 1, h: 8, static: true },
     },
     {
       nodeName: 'Y axis B',
       description: '',
       itemType: 'yAxis',
-      data: { i: '3', x: 0, y: 7, w: 1, h: 5, static: true },
+      data: { i: '3', x: 0, y: 9, w: 1, h: 8, static: true },
     },
   ])
   const [inputData, setInputData] = useState<InputData>({ nodeName: '', description: '' })
@@ -97,6 +98,22 @@ const DndMatrix: React.FC = (): ReactElement => {
     setInputData({ nodeName: inputData.nodeName, description: event.target.value })
   }
 
+  const onUpdateNodeNameChanged = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setUpdateData({
+      nodeName: event.target.value,
+      description: updateData.description,
+      key: updateData.key,
+    })
+  }
+
+  const onUpdateDescriptionChanged = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setUpdateData({
+      nodeName: updateData.nodeName,
+      description: event.target.value,
+      key: updateData.key,
+    })
+  }
+
   const onAddNode = () => {
     const maxIdx = Math.max.apply(
       null,
@@ -109,9 +126,9 @@ const DndMatrix: React.FC = (): ReactElement => {
       itemType: 'node',
       data: {
         i: `${maxIdx + 1}`,
-        x: 0,
-        y: 0,
-        w: 1,
+        x: 22,
+        y: 17,
+        w: 2,
         h: 1,
         maxH: 1,
       },
@@ -120,10 +137,34 @@ const DndMatrix: React.FC = (): ReactElement => {
     setInputData({ nodeName: '', description: '' })
   }
 
+  const onUpdateNode = () => {
+    setNodeData(
+      nodeData.map((item) => {
+        if (item.data.i === updateData.key) {
+          return {
+            nodeName: updateData.nodeName,
+            description: updateData.description,
+            data: item.data,
+            itemType: item.itemType,
+          }
+        } else {
+          return item
+        }
+      })
+    )
+  }
+
+  const onDeleteNode = () => {
+    if (updateData.key) {
+      setNodeData(nodeData.filter((item) => item.data.i !== updateData.key))
+      setUpdateData({ nodeName: '', description: '' })
+    }
+  }
+
   const onNodeSelected = (idx: string) => {
     const item = nodeData.find((i) => i.data.i === idx)
     if (item) {
-      setUpdateData({...item})
+      setUpdateData({ ...item, key: item.data.i })
     }
   }
 
@@ -138,7 +179,7 @@ const DndMatrix: React.FC = (): ReactElement => {
                 <GridLayout
                   cols={24}
                   rowHeight={30}
-                  maxRows={12}
+                  maxRows={18}
                   layout={nodeData.map((item) => item.data)}
                   width={matrixAreaWidth}
                   compactType={null}
@@ -158,7 +199,9 @@ const DndMatrix: React.FC = (): ReactElement => {
                           <ReactTooltip
                             id={`node-${item.data.i}`}
                             globalEventOff="click"
-                            afterShow={() => {onNodeSelected(item.data.i)}}
+                            afterShow={() => {
+                              onNodeSelected(item.data.i)
+                            }}
                           />
                         </Node>
                       )
@@ -200,7 +243,11 @@ const DndMatrix: React.FC = (): ReactElement => {
                   <Row>
                     <Col md={4}>Name</Col>
                     <Col md={8}>
-                      <input onChange={onNodeNameChanged} type="text" value={updateData.nodeName} />
+                      <input
+                        onChange={onUpdateNodeNameChanged}
+                        type="text"
+                        value={updateData.nodeName}
+                      />
                     </Col>
                   </Row>
                   <Row>
@@ -208,15 +255,15 @@ const DndMatrix: React.FC = (): ReactElement => {
                     <Col md={8}>
                       <input
                         type="text"
-                        onChange={onDescriptionChanged}
+                        onChange={onUpdateDescriptionChanged}
                         value={updateData.description}
                       />
                     </Col>
                   </Row>
                   <Row>
                     <Col md={6}>
-                      <button onClick={onAddNode}>Update</button>
-                      <button onClick={onAddNode}>Delete</button>
+                      <button onClick={onUpdateNode}>Update</button>
+                      <button onClick={onDeleteNode}>Delete</button>
                     </Col>
                   </Row>
                 </Container>
