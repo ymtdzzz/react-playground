@@ -77,6 +77,15 @@ resources:
             AcmCertificateArn: arn:aws:acm:us-east-1:936630031871:certificate/ca4ad8ac-ab99-46e9-818d-5838ddff0da3
           Aliases:
             - reactplayground.zeroclock.dev
+          CustomErrorResponses:
+            - ErrorCachingMinTTL: 300
+              ErrorCode: 403
+              ResponseCode: 200
+              ResponsePagePath: '/index.html'
+            - ErrorCachingMinTTL: 300
+              ErrorCode: 404
+              ResponseCode: 200
+              ResponsePagePath: '/index.html'
     StaticCloudFrontOriginAccessIdentity:
       Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
       Properties:
