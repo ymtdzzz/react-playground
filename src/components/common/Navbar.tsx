@@ -6,6 +6,7 @@ const Navbar: React.FC = (): ReactElement => {
     <div>
       <StyledLink to="/" text="Home" />
       <StyledLink to="/DndMatrix" text="DndMatrix" />
+      <StyledLink to="/WebsocketChat" text="WebsocketChat" />
     </div>
   )
 }

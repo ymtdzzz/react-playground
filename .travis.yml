@@ -9,6 +9,7 @@ install:
 - yarn install
 - sls config credentials --stage dev --provider aws --key "${aws_access_key_id}" --secret "${aws_secret_access_key}"
 script:
+- mv .env.production .env
 - yarn build
 - yarn deploy
 env:
