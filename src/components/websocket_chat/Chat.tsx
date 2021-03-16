@@ -230,7 +230,7 @@ const Chat: React.FC<Props> = (props: Props): ReactElement => {
       connection.send(JSON.stringify(logsData))
       console.log('logs get request sended')
     }
-  }, [connection, connectionComplete])
+  }, [connection, connectionComplete, partnerId, props.loginInfo.id])
 
   return (
     <>
@@ -249,8 +249,12 @@ const Chat: React.FC<Props> = (props: Props): ReactElement => {
             <ErrorMsg>{errorMsg}</ErrorMsg>
             <ChatMessage>{renderMessages(messagesState)}</ChatMessage>
             <ChatFooter>
-              <input type="text" value={message} onChange={onMessageChange} />
-              <button onClick={onSendMsg}>Send</button>
+              {partnerName !== '' && (
+               <>
+                 <input type="text" value={message} onChange={onMessageChange} />
+                 <button onClick={onSendMsg}>Send</button>
+               </>
+              )}
             </ChatFooter>
           </>
         )}
